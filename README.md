@@ -9,7 +9,8 @@ A native implementation helper to make native methods calls from flutter more ro
   * To avoid lock the UI thread all calls to native methods are made on another thread;
 
 # Limitations:
-At moment native methods can only receive one paramether, in future I will extend it.
+* At moment native methods can only receive one paramether, in future I will extend it.
+* At moment only String an byte[] return types and paramether type are stable. I will test and realese more types soon.
 
 # Usage:
 Add it in your root build.gradle at the end of repositories:
