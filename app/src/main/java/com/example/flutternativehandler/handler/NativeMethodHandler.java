@@ -55,7 +55,8 @@ public class NativeMethodHandler {
         }
         methodRouterManager.runTask(() -> {
             try {
-                Object response = method.invoke(parseArguments(argument, method.getArgumentClass()));
+                Object parsedArgument = parseArguments(argument, method.getArgumentClass());
+                Object response = parsedArgument != null ? method.invoke(parsedArgument) : method.invoke();
                 resultHandler.success(parseResponse(response, method.getReturnedClass()));
             } catch (Exception e) {
                 resultHandler.error(e.getClass().getName(), e.getMessage(), e.getLocalizedMessage());
