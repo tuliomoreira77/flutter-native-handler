@@ -39,10 +39,10 @@ public class NativeMethodHandler {
     private void addMethodsToMethodMap(Class<?> clazz, Object instance) throws MethodMapperException {
         for(Method method : clazz.getMethods()) {
             if(method.isAnnotationPresent(NativeMethod.class)) {
-                if(methods.containsKey(method.getName())) {
+                if(this.methods.containsKey(method.getName())) {
                     throw new MethodMapperException("Repeated method name on handlers");
                 }
-                methods.put(method.getName(), new MethodInstance(method, instance));
+                this.methods.put(method.getName(), new MethodInstance(method, instance));
             }
         }
     }
@@ -56,23 +56,64 @@ public class NativeMethodHandler {
         methodRouterManager.runTask(() -> {
             try {
                 Object response = method.invoke(parseArguments(argument, method.getArgumentClass()));
-                resultHandler.success(response);
+                resultHandler.success(parseResponse(response, method.getReturnedClass()));
             } catch (Exception e) {
                 resultHandler.error(e.getClass().getName(), e.getMessage(), e.getLocalizedMessage());
             }
         });
     }
 
-    @SuppressWarnings("unchecked")
+    private <T> Object parseResponse(Object response, Class<T> responseClass) {
+        if(responseClass == null) {
+            return null;
+        }
+        if(responseClass.equals(Void.class) || responseClass.equals(void.class)) {
+            return null;
+        }
+        if(responseClass.equals(String.class)) {
+            return (String) response;
+        }
+        if(responseClass.equals(byte[].class)) {
+            return (byte[]) response;
+        }
+        if(responseClass.equals(Integer.class) || responseClass.equals(int.class)) {
+            return (Integer) response;
+        }
+        if(responseClass.equals(Boolean.class) || responseClass.equals(boolean.class)) {
+            return (Boolean) response;
+        }
+        if(responseClass.equals(Double.class) || responseClass.equals(double.class)) {
+            return (Double) response;
+        }
+        if(responseClass.equals(Long.class) || responseClass.equals(long.class)) {
+            return (Long) response;
+        }
+        Gson gson = new Gson();
+        return gson.toJson(response, responseClass);
+    }
+
+
     private <T> Object parseArguments(Object argument, Class<T> expectedClass) {
         if(expectedClass == null) {
             return null;
         }
         if(expectedClass.equals(String.class)) {
-            return (T) argument;
+            return (String) argument;
         }
         if(expectedClass.equals(byte[].class)) {
-            return (T) argument;
+            return (byte[]) argument;
+        }
+        if(expectedClass.equals(Integer.class) || expectedClass.equals(int.class)) {
+            return (Integer) argument;
+        }
+        if(expectedClass.equals(Boolean.class) || expectedClass.equals(boolean.class)) {
+            return (Boolean) argument;
+        }
+        if(expectedClass.equals(Double.class) || expectedClass.equals(double.class)) {
+            return (Double) argument;
+        }
+        if(expectedClass.equals(Long.class) || expectedClass.equals(long.class)) {
+            return (Long) argument;
         }
         Gson gson = new Gson();
         return gson.fromJson((String) argument, expectedClass);
