@@ -56,7 +56,7 @@ public class NativeMethodHandler {
         methodRouterManager.runTask(() -> {
             try {
                 Object parsedArgument = parseArguments(argument, method.getArgumentClass());
-                Object response = parsedArgument != null ? method.invoke(parsedArgument) : method.invoke();
+                Object response = parsedArgument == null ? method.invoke() : method.invoke(parsedArgument);
                 resultHandler.success(parseResponse(response, method.getReturnedClass()));
             } catch (Exception e) {
                 resultHandler.error(e.getClass().getName(), e.getMessage(), e.getLocalizedMessage());
@@ -139,7 +139,7 @@ public class NativeMethodHandler {
         }
 
         public Object invoke(Object ...args) throws InvocationTargetException, IllegalAccessException {
-            return args[0] == null ? method.invoke(instance) : method.invoke(instance, args);
+            return args == null ? method.invoke(instance) : method.invoke(instance, args);
         }
     }
 
