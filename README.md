@@ -89,19 +89,21 @@ public class MainActivity extends FlutterActivity {
                 //Create a NativeMethodHandler instance and provide a implementation to NativeHandlerResult 
                 //This anonymous class will be suficient for most users, but you can provide your own implementation
                 new NativeMethodHandler(registerHandlerClasses(), new NativeHandlerResult() {
+                    // This line is mandatory as flutter result callbacks need to execute on UI Thread
+                    private final Handler handler = new Handler(Looper.getMainLooper()); 
                     @Override
                     public void success(Object _result) {
-                        result.success(_result);
+                        handler.post(() -> result.success(_result));
                     }
 
                     @Override
                     public void error(String errorCode, String errorMessage, Object errorDetails) {
-                        result.error(errorCode, errorMessage, errorDetails);
+                        handler.post(() -> result.error(errorCode, errorMessage, errorDetails));
                     }
 
                     @Override
                     public void notImplemented() {
-                        result.notImplemented();
+                        handler.post(result::notImplemented);
                     }
                 }).handle(call.method, call.arguments); //call handle method passing the funcion name and the arguments
             });
