@@ -10,7 +10,7 @@ A native implementation helper to make native methods calls from flutter more ro
 
 # Limitations:
 * At moment native methods can only receive one paramether, in future I will extend it.
-* At moment only String an byte[] return types and paramether type are stable. I will test and realese more types soon.
+* At moment i'm still testing the complex objects automatic serilization and deserialization, so if you find a bug please report it
 
 # Usage:
 Add it in your root build.gradle at the end of repositories:
