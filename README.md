@@ -26,7 +26,7 @@ allprojects {
 Add the dependency to the module build.gradle:
 ```gradle
 dependencies {
-  implementation 'com.github.tuliomoreira77:flutter-native-handler:0.9.4'
+  implementation 'com.github.tuliomoreira77:flutter-native-handler:0.9.5'
 }
 ```
 
