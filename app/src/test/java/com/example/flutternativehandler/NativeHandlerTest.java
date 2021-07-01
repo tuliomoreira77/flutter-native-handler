@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
  *
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
-public class ExampleUnitTest {
+public class NativeHandlerTest {
 
     @Test
     public void returnDoubleReceiveDouble() throws ExecutionException, InterruptedException, TimeoutException {
@@ -211,58 +211,6 @@ public class ExampleUnitTest {
         future.get(5000, TimeUnit.MILLISECONDS);
     }
 
-    @Test
-    public void receiveBadRequest() throws InterruptedException, ExecutionException, TimeoutException {
-        String argument = "TestTest";
-        String methodName = "receiveObjectReturnObject";
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
-        new NativeMethodHandler(new Object[] {new NativeHandlerTestClass()}, new NativeHandlerResult() {
-            @Override
-            public void success(Object _result) {
-                fail();
-                future.complete(true);
-            }
 
-            @Override
-            public void error(String errorCode, String errorMessage, Object errorDetails) {
-                assertTrue(true);
-                future.complete(true);
-            }
-
-            @Override
-            public void notImplemented() {
-                fail();
-                future.complete(true);
-            }
-        }).handle(methodName, argument);
-        future.get(1000, TimeUnit.MILLISECONDS);
-    }
-
-    @Test
-    public void methodNotImplemented() throws InterruptedException, ExecutionException, TimeoutException {
-        boolean argument = false;
-        String methodName = "methodNotImplemented";
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
-        new NativeMethodHandler(new Object[] {new NativeHandlerTestClass()}, new NativeHandlerResult() {
-            @Override
-            public void success(Object _result) {
-                fail();
-                future.complete(true);
-            }
-
-            @Override
-            public void error(String errorCode, String errorMessage, Object errorDetails) {
-                fail();
-                future.complete(true);
-            }
-
-            @Override
-            public void notImplemented() {
-                assertTrue(true);
-                future.complete(true);
-            }
-        }).handle(methodName, argument);
-        future.get(1000, TimeUnit.MILLISECONDS);
-    }
 
 }

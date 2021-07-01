@@ -1,7 +1,9 @@
 package com.example.flutternativehandler.handler;
 
 import com.example.flutternativehandler.annotation.NativeMethod;
-import com.example.flutternativehandler.injection.MethodMapperException;
+import com.example.flutternativehandler.exceptions.MethodMapperException;
+import com.example.flutternativehandler.exceptions.ParsingException;
+import com.example.flutternativehandler.exceptions.WrongArgumentTypeException;
 import com.example.flutternativehandler.tasks.TaskManager;
 import com.google.gson.Gson;
 
@@ -9,6 +11,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class NativeMethodHandler {
     private final Object[] instances;
@@ -58,66 +61,78 @@ public class NativeMethodHandler {
                 Object parsedArgument = parseArguments(argument, method.getArgumentClass());
                 Object response = parsedArgument == null ? method.invoke() : method.invoke(parsedArgument);
                 resultHandler.success(parseResponse(response, method.getReturnedClass()));
+            } catch (InvocationTargetException e) {
+                String className = e.getCause() != null ? e.getCause().getClass().getName() : e.getClass().getName();
+                String message = e.getCause() != null ? e.getCause().getLocalizedMessage() : e.getLocalizedMessage();
+                resultHandler.error(className, message, message);
             } catch (Exception e) {
                 resultHandler.error(e.getClass().getName(), e.getMessage(), e.getLocalizedMessage());
             }
         });
     }
 
-    private <T> Object parseResponse(Object response, Class<T> responseClass) {
-        if(responseClass == null) {
-            return null;
+    private <T> Object parseResponse(Object response, Class<T> responseClass) throws ParsingException {
+        try {
+            if (responseClass == null) {
+                return null;
+            }
+            if (responseClass.equals(Void.class) || responseClass.equals(void.class)) {
+                return null;
+            }
+            if (responseClass.equals(String.class)) {
+                return (String) response;
+            }
+            if (responseClass.equals(byte[].class)) {
+                return (byte[]) response;
+            }
+            if (responseClass.equals(Integer.class) || responseClass.equals(int.class)) {
+                return (Integer) response;
+            }
+            if (responseClass.equals(Boolean.class) || responseClass.equals(boolean.class)) {
+                return (Boolean) response;
+            }
+            if (responseClass.equals(Double.class) || responseClass.equals(double.class)) {
+                return (Double) response;
+            }
+            if (responseClass.equals(Long.class) || responseClass.equals(long.class)) {
+                return (Long) response;
+            }
+            Gson gson = new Gson();
+            return gson.toJson(response, responseClass);
+        } catch(Exception e) {
+            throw new ParsingException();
         }
-        if(responseClass.equals(Void.class) || responseClass.equals(void.class)) {
-            return null;
-        }
-        if(responseClass.equals(String.class)) {
-            return (String) response;
-        }
-        if(responseClass.equals(byte[].class)) {
-            return (byte[]) response;
-        }
-        if(responseClass.equals(Integer.class) || responseClass.equals(int.class)) {
-            return (Integer) response;
-        }
-        if(responseClass.equals(Boolean.class) || responseClass.equals(boolean.class)) {
-            return (Boolean) response;
-        }
-        if(responseClass.equals(Double.class) || responseClass.equals(double.class)) {
-            return (Double) response;
-        }
-        if(responseClass.equals(Long.class) || responseClass.equals(long.class)) {
-            return (Long) response;
-        }
-        Gson gson = new Gson();
-        return gson.toJson(response, responseClass);
     }
 
 
-    private <T> Object parseArguments(Object argument, Class<T> expectedClass) {
-        if(expectedClass == null) {
+    private <T> Object parseArguments(Object argument, Class<T> expectedClass) throws WrongArgumentTypeException {
+        if (expectedClass == null) {
             return null;
         }
-        if(expectedClass.equals(String.class)) {
+        if (expectedClass.equals(String.class)) {
             return (String) argument;
         }
-        if(expectedClass.equals(byte[].class)) {
+        if (expectedClass.equals(byte[].class)) {
             return (byte[]) argument;
         }
-        if(expectedClass.equals(Integer.class) || expectedClass.equals(int.class)) {
+        if (expectedClass.equals(Integer.class) || expectedClass.equals(int.class)) {
             return (Integer) argument;
         }
-        if(expectedClass.equals(Boolean.class) || expectedClass.equals(boolean.class)) {
+        if (expectedClass.equals(Boolean.class) || expectedClass.equals(boolean.class)) {
             return (Boolean) argument;
         }
-        if(expectedClass.equals(Double.class) || expectedClass.equals(double.class)) {
+        if (expectedClass.equals(Double.class) || expectedClass.equals(double.class)) {
             return (Double) argument;
         }
-        if(expectedClass.equals(Long.class) || expectedClass.equals(long.class)) {
+        if (expectedClass.equals(Long.class) || expectedClass.equals(long.class)) {
             return (Long) argument;
         }
         Gson gson = new Gson();
-        return gson.fromJson((String) argument, expectedClass);
+        T parsedArgument = gson.fromJson((String) argument, expectedClass);
+        if(parsedArgument == null)
+            throw new WrongArgumentTypeException(expectedClass.getName());
+
+        return parsedArgument;
     }
 
     private static class MethodInstance {

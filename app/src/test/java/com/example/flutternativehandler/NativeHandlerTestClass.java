@@ -1,6 +1,7 @@
 package com.example.flutternativehandler;
 
 import com.example.flutternativehandler.annotation.NativeMethod;
+import com.example.flutternativehandler.exceptions.ParsingException;
 
 public class NativeHandlerTestClass {
 
@@ -37,6 +38,11 @@ public class NativeHandlerTestClass {
     @NativeMethod
     public NativeTesteResponse receiveObjectReturnObject(NativeTestRequest request) {
         return new NativeTesteResponse(request.getI()/1.0, request.getS());
+    }
+
+    @NativeMethod
+    public void testExceptionHandling() throws ParsingException {
+        throw new ParsingException();
     }
 
 }
